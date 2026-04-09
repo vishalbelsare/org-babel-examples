@@ -69,6 +69,39 @@ fsolve(x*2+x=4,x)
     #+RESULTS:
     : [x = a + (b - a) / 2, y = (a - b) / 2]
 
+* embedded calc
+
+  We can assing variables using the ":=" syntax. Each formula can be
+  evaluated using =C-x * u= (calc-embedded-update-formula). When
+  opening a buffer with such formulas, using =C-x * a=
+  (calc-embedded-activate) will activate all formulas found in the
+  buffer (it may be preferrable to even place a local variable
+  definition with =eval:(calc-embedded-activate)= at the end of the
+  file).
+
+  \( varA := 5 \)
+  \( varB := 2 \)
+  \( varA + varB => 7 \)
+
+  A formula on a line surrounded by new lines is recognized without specific
+  opening and closing characters. Evaluating it moves it into the first column
+  for some reason (loss of indentation)
+
+varC := 35
+
+  \( varA + varB + varC => 42 \)
+
+varC + varA => 40
+
+  \( [1, 0, 1] + [2, 2, 2] => [3, 2, 3] \)
+
+
+  Solving a system of equations
+  \( solve([x + y = 10, x - y = 8], [x, y]) => [x = 9, y = 1] \)
+
+  \( solve([x + y = 6, x - y = 10], [x, y]) => [x = 8, y = -2] \)
+
+  
 * Calc from lisp
   - [[info:calc#Calling%20Calc%20from%20Your%20Programs][Emacs Info Manual: Calling Calc from your programs]]
   - nice blog post on [[http://nullprogram.com/blog/2015/10/30/][RSA cryptography using emacs Calc]] by Chris

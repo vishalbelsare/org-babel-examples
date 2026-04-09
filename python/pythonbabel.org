@@ -186,7 +186,7 @@
 * Reading from an org table as input
 
   #+NAME: tableA
-  | name  | tokns  |
+  | name  | tokens |
   |-------+--------|
   | Peter |      4 |
   | Paul  |      6 |

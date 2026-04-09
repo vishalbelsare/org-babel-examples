@@ -738,7 +738,7 @@
 
    in the following remote call, the $one variable is replaced by the
    local table's column number for column "one" (which is 2) instead
-   of the column numeber of the referred table (where "one" in the
+   of the column number of the referred table (where "one" marks the
    first column)
    #+NAME: refertableIdColName
    |   | one | two |

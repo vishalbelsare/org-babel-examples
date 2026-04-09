@@ -452,6 +452,9 @@ with its own headline, is displayed in a block:
    #+LATEX: \textcolor{red!75!green}{Text4}
    #+LATEX: \textcolor{red}{Text5}
 
+   The basic LaTeX colors are: black, blue, brown, cyan, darkgray,
+   gray, green, lightgray, lime, magenta, olive, orange, pink, purple,
+   red, teal, violet, white, yellow.
 
    TODO: The Beamer class loads the =xcolor= package by default. By including
    the xcolor option =dvipsnames= in the beamer class definition, we should

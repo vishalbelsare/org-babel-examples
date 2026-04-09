@@ -34,18 +34,21 @@
   #+END_SRC
 
   #+RESULTS:
-  : Emacs version: GNU Emacs 25.2.3 (x86_64-pc-linux-gnu, GTK+ Version 3.18.9)
-  :  of 2017-04-25
-  : org version: 9.1.2
+  : Emacs version: GNU Emacs 28.2 (build 2, x86_64-pc-linux-gnu, GTK+ Version 3.24.33, cairo version 1.16.0)
+  :  of 2023-04-16
+  : org version: 9.6.1
 
   #+BEGIN_SRC python :results output :exports both
     import sys
+    import pandas as pd
     print(sys.version)
+
+    print(f"Pandas Version: {pd.__version__}")
   #+END_SRC
 
   #+RESULTS:
-  : 3.6.3 |Anaconda, Inc.| (default, Oct 13 2017, 12:02:49) 
-  : [GCC 7.2.0]
+  : 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:08:06) [GCC 11.3.0]
+  : Pandas Version: 2.0.0
 
 * Links and Documentation
   - http://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
@@ -120,26 +123,88 @@
      from setuptools import setup
 
      setup(
-	 name = "orgbabelhelper",
-	 version = "1.0.7",
-	 description = "python helper module for Emacs org mode babel",
-	 long_description = "python helper module for working with Emacs"
-	 + " org babel source blocks",
-	 author = "Derek Feichtinger",
-	 author_email = "dfeich@gmail.com",
-	 license = "GPL",
-	 url = "https://github.com/dfeich/org-babel-examples/tree/master/python",
-	 packages = ['orgbabelhelper'],
+         name = "orgbabelhelper",
+         version = "1.0.8",
+         description = "python helper module for Emacs org mode babel",
+         long_description = "python helper module for working with Emacs"
+         + " org babel source blocks",
+         author = "Derek Feichtinger",
+         author_email = "dfeich@gmail.com",
+         license = "GPL",
+         url = "https://github.com/dfeich/org-babel-examples/tree/master/python",
+         packages = ['orgbabelhelper'],
 
-	 install_requires = ['pandas'],
-	 classifiers = [
-	     "Development Status :: 4 - Beta",
-	     "Intended Audience :: Developers",
-	     "Programming Language :: Python :: 3"
-	 ]
+         install_requires = ['pandas'],
+         classifiers = [
+             "Development Status :: 4 - Beta",
+             "Intended Audience :: Developers",
+             "Programming Language :: Python :: 3"
+         ]
      )
    #+END_SRC
-   
+
+   #+RESULTS:
+
+
+   #+BEGIN_SRC bash
+          cat > orgbabelhelper/pyproject.toml <<EOF
+          [build-system]
+          # requires = ["hatchling"]
+          # build-backend = "hatchling.build"
+          requires = ["setuptools", "setuptools-scm"]
+          build-backend = "setuptools.build_meta"
+                   
+          [project]
+          name = "orgbabelhelper"
+          version = "1.0.8"
+          description = "python helper module for Emacs org mode babel"
+          authors = [{name="Derek Feichtinger", email="dfeich@gmail.com"},]
+          # readme = "README.md"
+          requires-python = ">=3.4"
+          classifiers = [
+              "Programming Language :: Python :: 3",
+              "License :: OSI Approved :: MIT License",
+              "Operating System :: OS Independent",
+          ]
+
+          [project.urls]
+          homepage = "https://github.com/dfeich/org-babel-examples/tree/master/python"
+
+          EOF
+
+   #+END_SRC
+
+   #+RESULTS:
+
+   #+begin_src bash 
+     cat > orgbabelhelper/LICENSE <<EOF
+     MIT License
+
+     Copyright (c) [2023] [Derek Feichtinger]
+
+     Permission is hereby granted, free of charge, to any person obtaining a copy
+     of this software and associated documentation files (the "Software"), to deal
+     in the Software without restriction, including without limitation the rights
+     to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     copies of the Software, and to permit persons to whom the Software is
+     furnished to do so, subject to the following conditions:
+
+     The above copyright notice and this permission notice shall be included in all
+     copies or substantial portions of the Software.
+
+     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+     SOFTWARE.
+
+     EOF
+   #+end_src
+
+   #+RESULTS:
+
 ** module imports for orgbabelhelper.py
 
    #+BEGIN_SRC python :tangle orgbabelhelper/orgbabelhelper/orgbabelhelper.py
@@ -150,7 +215,7 @@
      #
      ######################################################################
 
-     """ This module provides a number of functions for passing informations between
+     """ This module provides a number of functions for passing information between
      the org document and python source code blocks."""
 
      import pandas as pd
@@ -166,6 +231,26 @@
    3. tangle the files
    4. execute the source block, below
 
+   We prepare the build file [[file:orgbabelhelper/conda-recipe/build.sh][orgbabelhelper/conda-recipe/build.sh]]
+   #+BEGIN_SRC bash :tangle orgbabelhelper/conda-recipe/build.sh
+     #!/bin/bash
+
+     # a monkeypatch for solving a conda problem with the installed
+     # packages in the python 3.7 environment where conda insists to
+     # install a compatible package containing a py3.10 string part.
+     # That 
+     if [[ -e $CONDA_PREFIX/lib/python3.7/site-packages/pytz-2021.3-py3.10.egg-info ]]; then
+         ln -s pytz-2021.3-py3.10.egg-info $CONDA_PREFIX/lib/python3.7/site-packages/pytz-2021.3-py3.7.egg-info
+         MKPATCH=y
+     fi
+
+     $PYTHON setup.py install
+
+     [[ $MKPATCH = "y" ]] && rm $CONDA_PREFIX/lib/python3.7/site-packages/pytz-2021.3-py3.7.egg-info
+
+   #+END_SRC
+
+   
    Building the conda package
    #+BEGIN_SRC bash :results output
      cd orgbabelhelper
@@ -174,11 +259,12 @@
          echo "Build OK"
      else
          echo "Build FAILED. investigate conda-build.out"
+         tail -30 conda-build.out
      fi
    #+END_SRC
 
    #+RESULTS:
-   : Build OK
+   : Build FAILED. investigate conda-build.out
 
    To install the newly built local package, use 
    #+BEGIN_SRC sh :results output
@@ -486,11 +572,11 @@ return fname # return filename to org-mode
 *** src for orgtable_to_dataframe
     #+NAME: src_orgtable_to_dataframe
     #+BEGIN_SRC python :tangle orgbabelhelper/orgbabelhelper/orgbabelhelper.py :noweb yes
-      # NOTANGLE-START
+      # NOTANGLE-START  aaa
       import pandas as pd
 
       <<src_orgdate_to_date>>
-      # NOTANGLE-END
+      # NOTANGLE-END aaa
 
       def orgtable_to_dataframe(tbl, index=None, datecols=None,
                                 clean_adv=True, num_titlerows=1):
@@ -574,18 +660,18 @@ return fname # return filename to org-mode
 
      #+RESULTS:
      #+begin_example
-			  Date               End   Name
+                          Date               End   Name
      1  [2016-08-10 Wed 10:00]  [2016-08-17 Wed]  Peter
      2  [2016-08-11 Thu 11:00]  [2016-08-18 Thu]   Paul
      3  [2016-08-12 Fri 12:00]  [2016-08-19 Fri]   Mary
 
-			  Date        End
+                          Date        End
      Name                                
      Peter 2016-08-10 10:00:00 2016-08-17
      Paul  2016-08-11 11:00:00 2016-08-18
      Mary  2016-08-12 12:00:00 2016-08-19
 
-				   Date   Name
+                                   Date   Name
      End                                      
      2016-08-17  [2016-08-10 Wed 10:00]  Peter
      2016-08-18  [2016-08-11 Thu 11:00]   Paul
@@ -683,7 +769,7 @@ return fname # return filename to org-mode
 
      first table with 0 title rows:
 
-	    0       1       2
+            0       1       2
      0  First    Game   costs
      1   name  tokens  in CHF
      2  Peter       4      20
@@ -692,12 +778,10 @@ return fname # return filename to org-mode
 
      second table with 3 title rows:
 
-       First name (string)         ...          costs in CHF (float)
-     4               Peter         ...                            20
-     5                Paul         ...                            30
-     6                Mary         ...                            40
-
-     [3 rows x 3 columns]
+       First name (string) Game tokens (int) costs in CHF (float)
+     4               Peter                 4                 20.0
+     5                Paul                 6                 30.0
+     6                Mary                 8                 40.0
      #+end_example
      
      
@@ -741,7 +825,7 @@ return fname # return filename to org-mode
           if name:
               result += "#+NAME: %s\n" % name
 
-          lines = '|' + dframe.to_csv(None, sep='|', line_terminator='|\n|',
+          lines = '|' + dframe.to_csv(None, sep='|', lineterminator='|\n|',
                                       encoding=encoding, index=index, date_format=date_format).rstrip("|").rstrip("\n")
 
           hlines_tmp=[]
@@ -786,7 +870,7 @@ return fname # return filename to org-mode
      #+END_SRC
 
      #+RESULTS:
-     :RESULTS:
+     :results:
      |    |  A | B | C   |          E | F     |
      |----+----+---+-----+------------+-------|
      |  0 | 10 | A | foo | 2016-08-01 | one   |
@@ -802,7 +886,7 @@ return fname # return filename to org-mode
      | 10 | 20 | B | bar | 2016-08-02 | two   |
      | 11 | 21 | C | bar | 2016-08-03 | three |
 
-     :END:
+     :end:
 
 **** Test using date format specification:
 
@@ -820,17 +904,17 @@ return fname # return filename to org-mode
      #+END_SRC
 
      #+RESULTS:
-     :RESULTS:
+     :results:
      | Name  | Date         | End          |
      |-------+--------------+--------------|
      | Peter | 10. Aug 2016 | 17. Aug 2016 |
      | Paul  | 11. Aug 2016 | 18. Aug 2016 |
      | Mary  | 12. Aug 2016 | 19. Aug 2016 |
 
-     :END:
+     :end:
 
 **** Test with horizontal line separator specification
-     
+
      #+BEGIN_SRC python :results output verbatim drawer :var tblB=tblTwoTitleRowsB :colnames=no :noweb yes
        import pandas as pd
        import numpy as np
@@ -838,16 +922,19 @@ return fname # return filename to org-mode
        <<src_orgtable_to_dataframe>>
        <<dframeToOrg>>
 
-       df = orgtable_to_dataframe(tblB, num_titlerows=2)
-       df.drop(3, inplace=True)
-       df = df.append({'First name': 'SUM',
-                       'Game tokens': df['Game tokens'].sum(),
-                       'costs in CHF': df['costs in CHF'].sum()}, ignore_index=True)
+       df = orgtable_to_dataframe(tblB, num_titlerows=2,clean_adv=True)
+       df.drop(3, inplace=True) # drop row from original table (description strings)
+       df = pd .concat([df,
+                        pd.DataFrame.from_dict(
+                            {'First name': ['SUM'],
+                             'Game tokens': [df['Game tokens'].sum()],
+                             'costs in CHF': [df['costs in CHF'].sum()]}
+                        )])
        print(dataframe_to_orgtable(df, hlines=[1,-1], index=False))
      #+END_SRC
 
      #+RESULTS:
-     :RESULTS:
+     :results:
      | First name | Game tokens | costs in CHF |
      |------------+-------------+--------------|
      | Peter      |           4 |         20.0 |
@@ -856,7 +943,7 @@ return fname # return filename to org-mode
      |------------+-------------+--------------|
      | SUM        |          18 |         90.0 |
 
-     :END:
+     :end:
      
 ** other methods for printing a data frame
 *** data frame printing using Ipython.display
@@ -1291,7 +1378,6 @@ options:
 # org-babel-python-command: "/home/dfeich/py-virtualenv/notebook/bin/python"
 
 Local Variables:
-org-babel-python-command: "/opt/anaconda/python3.6/bin/python"
 org-babel-after-execute-hook: (lambda () (org-display-inline-images nil t) (org-redisplay-inline-images))
 org-confirm-babel-evaluate: nil
 org-babel-sh-command: "/bin/bash"

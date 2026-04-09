@@ -22,7 +22,7 @@
 
 * Links
   - Homepage:  http://plantuml.com/
-  - Downloads:  http://plantuml.sourceforge.net/
+  - Downloads: https://plantuml.com/download
   - Source code: https://github.com/plantuml/plantuml
   - Language Reference: http://plantuml.com/PlantUML_Language_Reference_Guide.pdf
 
@@ -34,9 +34,9 @@
    #+END_SRC
 
    #+RESULTS:
-   : Emacs version: GNU Emacs 27.1.90 (build 1, x86_64-pc-linux-gnu, GTK+ Version 3.22.30)
-   :  of 2021-01-26
-   : org version: 9.4.5
+   : Emacs version: GNU Emacs 28.2 (build 2, x86_64-pc-linux-gnu, GTK+ Version 3.24.33, cairo version 1.16.0)
+   :  of 2023-04-16
+   : org version: 9.6.1
 
   #+BEGIN_SRC sh :results output :exports results :var jpath=(expand-file-name org-plantuml-jar-path) :eval query-export
   echo "Emacs variable org-plantuml-jar-path:$jpath\n\n"
@@ -52,7 +52,7 @@
   Emacs variable org-plantuml-jar-path:/home/dfeich/.emacs.d/javalib/plantuml.jar
 
 
-  PlantUML version 1.2021.9 (Sun Jul 25 12:13:56 CEST 2021)
+  PlantUML version 1.2023.7 (Fri May 12 19:23:42 CEST 2023)
   (GPL source distribution)
   Java Runtime: OpenJDK Runtime Environment
   JVM: OpenJDK 64-Bit Server VM
@@ -62,7 +62,7 @@
 
   PLANTUML_LIMIT_SIZE: 4096
 
-  Dot version: dot - graphviz version 2.40.1 (20161225.0304)
+  Dot version: dot - graphviz version 2.43.0 (0)
   Installation seems OK. File generation OK
   #+end_example
 
@@ -76,16 +76,17 @@
   #+RESULTS:
   #+begin_example
   Usage: java -jar plantuml.jar [options] -gui
-	  (to execute the GUI)
+          (to execute the GUI)
       or java -jar plantuml.jar [options] [file/dir] [file/dir] [file/dir]
-	  (to process files or directories)
+          (to process files or directories)
 
   You can use the following wildcards in files/dirs:
-	  ,*	means any characters but '/'
-	  ?	one and only one character but '/'
-	  ,**	means any characters (used to recurse through directories)
+          ,*	means any characters but '/'
+          ?	one and only one character but '/'
+          ,**	means any characters (used to recurse through directories)
 
   where options include:
+      -darkmode		To use dark mode for diagrams
       -gui		To run the graphical user interface
       -tpng		To generate images using PNG format (default)
       -tsvg		To generate images using SVG format
@@ -102,16 +103,16 @@
       -o[utput] "dir"	To generate images in the specified directory
       -DVAR1=value	To set a preprocessing variable as if '!define VAR1 value' were used
       -Sparam1=value	To set a skin parameter as if 'skinparam param1 value' were used
-      -r[ecurse]		recurse through directories
+      -Ppragma1=value	To set pragma as if '!pragma pragma1 value' were used
       -I/path/to/file	To include file as if '!include file' were used
       -I/path/to/*.puml	To include files with pattern
+      -theme xxx		To use a specific theme
       -charset xxx	To use a specific charset (default is UTF-8)
       -e[x]clude pattern	To exclude files that match the provided pattern
       -metadata		To retrieve PlantUML sources from PNG images
       -nometadata		To NOT export metadata in PNG/SVG generated files
       -checkmetadata		Skip PNG files that don't need to be regenerated
       -version		To display information about PlantUML and Java versions
-      -checkversion	To check if a newer version is available for download
       -v[erbose]		To have log information
       -quiet		To NOT print error message into the console
       -debugsvek		To generate intermediate svek files
@@ -127,10 +128,10 @@
       -checkonly		To check the syntax of files without generating images
       -failfast		To stop processing as soon as a syntax error in diagram occurs
       -failfast2		To do a first syntax check before processing files, to fail even faster
-      -pattern		To print the list of Regular Expression used by PlantUML
+      -noerror		To skip images when error in diagrams
       -duration		To print the duration of complete diagrams processing
       -nbthread N		To use (N) threads for processing
-      -nbthread auto	To use 4 threads for processing
+      -nbthread auto	To use 16 threads for processing
       -timeout N		Processing timeout in (N) seconds. Defaults to 15 minutes (900 seconds).
       -author[s]		To print information about PlantUML authors
       -overwrite		To allow to overwrite read only files
@@ -146,9 +147,11 @@
       -pipeimageindex N	To generate the Nth image with pipe option
       -stdlib		To print standard library info
       -extractstdlib	To extract PlantUML Standard Library into stdlib folder
+      -filedir xxx	To behave as if the PlantUML source is in this dir (only affects '-pipe' and PicoWeb 'POST /render')
       -filename "example.puml"	To override %filename% variable
       -preproc		To output preprocessor text of diagrams
       -cypher		To cypher texts of diagrams so that you can share them
+      -picoweb		To start internal HTTP Server. See https://plantuml.com/picoweb
 
   If needed, you can setup the environment variable GRAPHVIZ_DOT.
   #+end_example
@@ -639,6 +642,28 @@
    #+RESULTS:
    [[file:fig/wbsdiag1.png]]
 
+
+   Using org mode headlines
+   #+BEGIN_SRC plantuml :file fig/wbsdiag1org.png :exports both
+     @startwbs
+     scale 2
+     ,* Business Process Modelling WBS
+     ,** Launch the project
+     ,*** Complete Stakeholder Research
+     ,*** Initial Implementation Plan
+     ,** Design phase
+     ,*** Model of AsIs Processes Completed
+     ,**** Model of AsIs Processes Completed1
+     ,**** Model of AsIs Processes Completed2
+     ,*** Measure AsIs performance metrics
+     ,*** Identify Quick Wins
+     ,** Complete innovate phase
+     @endwbs
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/wbsdiag1org.png]]
+   
    #+BEGIN_SRC plantuml :file fig/wbsdiag2.png :exports both
      @startwbs
      ' skinparam backgroundColor blue
@@ -712,7 +737,6 @@
    #+RESULTS:
    [[file:fig/wbsdiag3.png]]
 
-   
 ** TODO how to change font size in WBS?
 
    Which skinparam can be used to change font size? 
@@ -735,7 +759,178 @@
      ++ this is another workpackage
      @endwbs
    #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/wbsdiag2.png]]
    
+** gantt
+
+   #+BEGIN_SRC plantuml :file fig/gantt1.png :exports both
+     @startgantt
+     scale 2
+     saturday are closed
+     sunday are closed
+
+     Project starts 2021-01-01
+     [Prototype design end] as [TASK1] lasts 19 days
+     [TASK1] is colored in Lavender/LightBlue
+     [Testing] lasts 14 days
+     [TASK1]->[Testing]
+
+     2021-01-18 to 2021-01-22 are colored in salmon 
+     @endgantt
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/gantt1.png]]
+
+
+   #+BEGIN_SRC plantuml :file fig/gantt2.png :exports both
+     @startgantt
+     scale 2
+     Projectscale weekly
+     saturday are closed
+     sunday are closed
+
+     Project starts 2021-01-01
+     [Prototype design end] as [TASK1] lasts 19 days
+     [TASK1] is colored in Lavender/LightBlue
+     [Testing] lasts 14 days
+     [TASK1]->[Testing]
+
+     2021-01-18 to 2021-01-22 are colored in salmon 
+     @endgantt
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/gantt2.png]]
+
+
+
+** JSON
+
+   #+BEGIN_SRC plantuml :file fig/jsondiag1.png :exports both
+     @startjson
+     scale 2
+     {
+        "fruit":"Apple",
+        "size":"Large",
+        "color": ["Red", "Green"]
+     }
+     @endjson
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/jsondiag1.png]]
+
+
+   #+BEGIN_SRC plantuml :file fig/jsondiag2.png :exports both
+@startjson
+scale 2
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true,
+  "age": 27,
+  "address": {
+    "streetAddress": "21 2nd Street",
+    "city": "New York",
+    "state": "NY",
+    "postalCode": "10021-3100"
+  },
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "212 555-1234"
+    },
+    {
+      "type": "office",
+      "number": "646 555-4567"
+    }
+  ],
+  "children": [],
+  "spouse": null
+}
+@endjson
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/jsondiag2.png]]
+   
+
+   Note: *the highlight style assignment will clash with the org mode noweb
+   syntax*
+   
+   #+BEGIN_SRC plantuml :file fig/jsondiag3.png :exports both
+@startjson
+scale 2
+<style>
+  .h1 {
+    BackGroundColor green
+    FontColor white
+    FontStyle italic
+  }
+  .h2 {
+    BackGroundColor red
+    FontColor white
+    FontStyle bold
+  }
+</style>
+#highlight "lastName"
+#highlight "address" / "city" <<h1>>
+#highlight "phoneNumbers" / "0" / "number" <<h2>>
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "isAlive": true,
+  "age": 28,
+  "address": {
+    "streetAddress": "21 2nd Street",
+    "city": "New York",
+    "state": "NY",
+    "postalCode": "10021-3100"
+  },
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "212 555-1234"
+    },
+    {
+      "type": "office",
+      "number": "646 555-4567"
+    }
+  ],
+  "children": [],
+  "spouse": null
+}
+@endjson
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:fig/jsondiag3.png]]
+
+* Listing sprites
+  #+BEGIN_SRC plantuml :file fig/listsprites1.png :exports both
+    @startuml
+    scale 2
+
+    !define osaPuml https://raw.githubusercontent.com/Crashedmind/PlantUML-opensecurityarchitecture2-icons/master
+    !include osaPuml/Common.puml
+    !include osaPuml/User/all.puml
+    !include osaPuml/Hardware/all.puml
+    !include osaPuml/Misc/all.puml
+    !include osaPuml/Server/all.puml
+    !include osaPuml/Site/all.puml
+
+    listsprites
+
+    footer %filename() rendered with PlantUML version %version()\nThe Hitchhiker’s Guide to PlantUML
+    @enduml
+  #+END_SRC
+
+  #+RESULTS:
+  [[file:fig/listsprites1.png]]
+
 * Preprocessing
   https://plantuml.com/preprocessing
 
